@@ -403,7 +403,7 @@ Regras para classificação:
 Se não houver nenhum problema técnico relevante nos escopos selecionados, retorne ao menos um item "ok" descrevendo o que está correto.
 Seja objetivo e específico. Cite trechos do texto original quando relevante (entre aspas).`;
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  const response = await fetch('/api/review', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
