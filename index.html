@@ -74,8 +74,17 @@ textarea:focus{border-color:var(--jt-accent)}
 #file-input{display:none}
 #file-name{font-size:12px;color:var(--ok);margin-top:8px;min-height:16px}
 
+.scope-section-label{
+  font-size:13px;font-weight:500;color:var(--muted);
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:8px;
+}
+.scope-toggle-all{
+  font-size:11px;color:var(--jt-blue-mid);cursor:pointer;
+  text-decoration:underline;text-underline-offset:2px;
+}
 .scope-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;
   margin-bottom:16px;
 }
 .scope-item{
@@ -88,6 +97,22 @@ textarea:focus{border-color:var(--jt-accent)}
 .scope-item.on{background:var(--jt-light);border-color:var(--jt-accent);color:var(--jt-blue);font-weight:500}
 .scope-item i{font-size:15px}
 
+.format-row{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+}
+.format-label{font-size:13px;font-weight:500;color:var(--muted);white-space:nowrap;}
+.format-select{
+  flex:1;min-width:180px;
+  padding:8px 12px;
+  border:1px solid var(--jt-border);border-radius:8px;
+  font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);
+  background:#fff;outline:none;cursor:pointer;
+  transition:border .15s;
+}
+.format-select:focus{border-color:var(--jt-accent)}
+
 .btn-run{
   width:100%;padding:13px;
   background:var(--jt-blue);color:#fff;
@@ -95,7 +120,7 @@ textarea:focus{border-color:var(--jt-accent)}
   font-family:'Sora',sans-serif;font-size:14px;font-weight:600;
   cursor:pointer;transition:background .15s;
   display:flex;align-items:center;justify-content:center;gap:8px;
-  margin-top:16px;
+  margin-top:4px;
 }
 .btn-run:hover{background:var(--jt-blue-mid)}
 .btn-run:disabled{opacity:.5;cursor:not-allowed}
@@ -103,7 +128,7 @@ textarea:focus{border-color:var(--jt-accent)}
 .progress-wrap{display:none;margin-top:16px}
 .progress-label{font-size:12px;color:var(--muted);margin-bottom:6px}
 .progress-bar-bg{background:var(--jt-light);border-radius:100px;height:7px;overflow:hidden}
-.progress-bar-fill{height:100%;width:0%;background:var(--jt-accent);border-radius:100px;transition:width .4s ease;}
+.progress-bar-fill{height:100%;width:0%;background:var(--jt-accent);border-radius:100px;transition:width .5s ease;}
 .step-log{margin-top:8px;font-size:12px;color:var(--muted);min-height:16px}
 
 .result-area{display:none;margin-top:20px}
@@ -130,8 +155,8 @@ textarea:focus{border-color:var(--jt-accent)}
 .finding.ok{background:var(--ok-bg);border-color:var(--ok)}
 .finding.warn{background:var(--warn-bg);border-color:var(--warn)}
 .finding.err{background:var(--err-bg);border-color:var(--err)}
-.finding-head{display:flex;align-items:center;gap:8px;margin-bottom:5px}
-.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:100px}
+.finding-head{display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap;}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:100px;white-space:nowrap;}
 .badge.ok{background:var(--ok);color:#fff}
 .badge.warn{background:var(--warn);color:#fff}
 .badge.err{background:var(--err);color:#fff}
@@ -143,12 +168,19 @@ textarea:focus{border-color:var(--jt-accent)}
   font-family:'Sora',sans-serif;font-size:13px;font-weight:700;
   color:var(--jt-blue);margin:16px 0 8px;
   padding-bottom:6px;border-bottom:1px solid var(--jt-border);
+  display:flex;align-items:center;gap:6px;
 }
 
 .disclaimer{
   font-size:11px;color:var(--muted);
   background:var(--jt-light);border-radius:6px;
   padding:10px 12px;margin-top:14px;line-height:1.6;
+}
+
+.error-box{
+  background:var(--err-bg);border:1px solid var(--err-border);
+  border-radius:8px;padding:14px;margin-top:16px;
+  font-size:13px;color:var(--err);line-height:1.6;
 }
 
 .footer{
@@ -165,7 +197,7 @@ textarea:focus{border-color:var(--jt-accent)}
   <div class="logo-mark">J</div>
   <div class="header-text">
     <h1>Revisor Técnico Jettax</h1>
-    <p>Análise fiscal, tributária e contábil com base em fontes oficiais</p>
+    <p>Análise fiscal, tributária, contábil e linguística com IA</p>
   </div>
 </div>
 
@@ -181,7 +213,7 @@ textarea:focus{border-color:var(--jt-accent)}
 
   <div id="panel-text" class="panel active">
     <label for="txt-input">Cole o material para revisão</label>
-    <textarea id="txt-input" placeholder="Cole aqui o artigo, manual, parecer ou qualquer conteúdo técnico fiscal/tributário/contábil que deseja revisar..."></textarea>
+    <textarea id="txt-input" placeholder="Cole aqui o artigo, post de redes sociais, manual, parecer ou qualquer conteúdo que deseja revisar..."></textarea>
   </div>
 
   <div id="panel-file" class="panel">
@@ -195,13 +227,34 @@ textarea:focus{border-color:var(--jt-accent)}
   </div>
 
   <div style="margin-top:18px">
-    <label>Escopo de revisão</label>
+    <div class="format-row">
+      <span class="format-label"><i class="ti ti-layout"></i> Formato do conteúdo:</span>
+      <select class="format-select" id="content-format">
+        <option value="artigo">Artigo / Blog</option>
+        <option value="post">Post de redes sociais</option>
+        <option value="carrossel">Carrossel (slides)</option>
+        <option value="email">E-mail / Newsletter</option>
+        <option value="manual">Manual / Guia técnico</option>
+        <option value="parecer">Parecer / Documento formal</option>
+        <option value="roteiro">Roteiro / Script de vídeo</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
+
+    <div class="scope-section-label">
+      <span>Escopos de revisão</span>
+      <span class="scope-toggle-all" onclick="toggleAll()">Marcar / desmarcar todos</span>
+    </div>
     <div class="scope-grid" id="scope-grid">
       <div class="scope-item on" data-scope="fiscal"><i class="ti ti-receipt"></i> Fiscal</div>
       <div class="scope-item on" data-scope="tributario"><i class="ti ti-building-bank"></i> Tributário</div>
       <div class="scope-item on" data-scope="contabil"><i class="ti ti-calculator"></i> Contábil</div>
       <div class="scope-item on" data-scope="obrigacoes"><i class="ti ti-clipboard-list"></i> Obrig. Acessórias</div>
+      <div class="scope-item on" data-scope="previdenciario"><i class="ti ti-shield-check"></i> Previdenciário</div>
+      <div class="scope-item on" data-scope="trabalhista"><i class="ti ti-briefcase"></i> Trabalhista</div>
+      <div class="scope-item on" data-scope="reforma"><i class="ti ti-refresh"></i> Reforma Tributária</div>
       <div class="scope-item on" data-scope="noticias"><i class="ti ti-news"></i> Notícias / Contexto</div>
+      <div class="scope-item on" data-scope="ortografia"><i class="ti ti-abc"></i> Ortografia / Gramática</div>
     </div>
   </div>
 
@@ -226,7 +279,7 @@ textarea:focus{border-color:var(--jt-accent)}
     <div id="findings-container"></div>
     <div class="disclaimer">
       <i class="ti ti-info-circle"></i>
-      <strong>Aviso:</strong> Este agente utiliza base de conhecimento pré-carregada com normas vigentes até agosto de 2025. Para legislação posterior, recomenda-se consulta direta às fontes oficiais: <strong>gov.br/receitafederal</strong>, <strong>sped.rfb.gov.br</strong> e <strong>planalto.gov.br</strong>.
+      <strong>Aviso:</strong> A análise técnica tem como referência normas vigentes até meados de 2025. Para legislação posterior, recomenda-se consulta direta às fontes oficiais: <strong>gov.br/receitafederal</strong>, <strong>sped.rfb.gov.br</strong> e <strong>planalto.gov.br</strong>.
     </div>
   </div>
 </div>
@@ -238,71 +291,33 @@ textarea:focus{border-color:var(--jt-accent)}
 </div>
 
 <script>
-const KB = {
-  normas: [
-    {texto:'EFD-Reinf foi criada pela IN RFB nº 1.701/2017 e atualmente é disciplinada pela IN RFB nº 2.043/2021',fonte:'IN RFB nº 2.043/2021 — sped.rfb.gov.br'},
-    {texto:'prazo de entrega da EFD-Reinf é o dia 15 do mês seguinte',fonte:'FAQ SPED/RFB — sped.rfb.gov.br/item/show/1497'},
-    {texto:'DCTFWeb deve ser entregue até o dia 15 do mês seguinte',fonte:'IN RFB nº 2.005/2021; IN RFB nº 2.162/2023'},
-    {texto:'DCTF mensal unificada à DCTFWeb a partir de janeiro de 2025',fonte:'GOV.BR — gov.br/pt-br/servicos'},
-    {texto:'multa por atraso na DCTFWeb é de 2% ao mês limitada a 20%',fonte:'Art. 32-A da Lei nº 8.212/1991'},
-    {texto:'multa mínima da DCTFWeb é de R$ 200',fonte:'Art. 32-A da Lei nº 8.212/1991'},
-    {texto:'DIRF extinta para fatos geradores a partir de 1º de janeiro de 2025',fonte:'IN RFB nº 2.096/2022; Receita Federal'},
-    {texto:'SPED foi criado pelo Decreto nº 6.022/2007',fonte:'Decreto nº 6.022, de 22 de janeiro de 2007'},
-    {texto:'eSocial em conjunto com EFD-Reinf alimenta a DCTFWeb',fonte:'Manual EFD-Reinf — sped.rfb.gov.br'},
-    {texto:'CPRB Contribuição Previdenciária sobre a Receita Bruta',fonte:'Lei nº 12.546/2011'},
-    {texto:'DCTFWeb retificadora deve ser transmitida mesmo sem alteração de valores',fonte:'P&R DCTFWeb fev/2025 — gov.br/receitafederal'},
-    {texto:'EFD-Reinf dispensa envio quando não há fatos a declarar',fonte:'IN RFB nº 2.043/2021; FAQ SPED/RFB'},
-    {texto:'Série R-4000 da EFD-Reinf substitui as informações da DIRF',fonte:'IN RFB nº 2.096/2022 e atos posteriores'},
-    {texto:'retenção de INSS sobre serviços prestados mediante cessão de mão de obra',fonte:'Art. 31 da Lei nº 8.212/1991; IN RFB nº 971/2009'},
-    {texto:'MAED emitida automaticamente pelo sistema a partir de julho de 2022',fonte:'Receita Federal — Notícia jun/2022'},
-    {texto:'MIT Módulo de Inclusão de Tributos integrado à DCTFWeb a partir de 2025',fonte:'GOV.BR — Serviço DCTFWeb unificada'},
-    {texto:'quando o dia 15 cair em dia não útil para a DCTFWeb o prazo é postergado',fonte:'IN RFB nº 2.162/2023'},
-    {texto:'quando o dia 15 cair em feriado bancário para a EFD-Reinf o prazo é antecipado',fonte:'sped.rfb.gov.br/pagina/show/6017'},
-    {texto:'Simples Nacional regime tributário diferenciado para ME e EPP',fonte:'Lei Complementar nº 123/2006'},
-    {texto:'Lucro Real regime de tributação com base no lucro efetivo',fonte:'Decreto nº 9.580/2018 (RIR)'},
-    {texto:'Lucro Presumido regime com base presumida de lucro',fonte:'Arts. 591 a 603 do Decreto nº 9.580/2018'},
-    {texto:'ICMS Imposto sobre Circulação de Mercadorias e Serviços',fonte:'Lei Complementar nº 87/1996 (Lei Kandir)'},
-    {texto:'ISS Imposto Sobre Serviços de qualquer natureza',fonte:'Lei Complementar nº 116/2003'},
-    {texto:'Reforma Tributária sobre o Consumo instituída pela Emenda Constitucional nº 132/2023',fonte:'EC nº 132/2023; LC nº 214/2025'},
-    {texto:'CBS Contribuição sobre Bens e Serviços substitui PIS/COFINS',fonte:'LC nº 214/2025'},
-    {texto:'IBS Imposto sobre Bens e Serviços substitui ICMS e ISS',fonte:'LC nº 214/2025'},
-    {texto:'IS Imposto Seletivo incide sobre bens e serviços prejudiciais à saúde',fonte:'EC nº 132/2023; LC nº 214/2025'},
-    {texto:'DAS Documento de Arrecadação do Simples Nacional',fonte:'Lei Complementar nº 123/2006'},
-    {texto:'e-CAC Centro Virtual de Atendimento ao Contribuinte da Receita Federal',fonte:'gov.br/receitafederal'},
-    {texto:'CND Certidão Negativa de Débitos',fonte:'Art. 205 do Código Tributário Nacional'},
-    {texto:'CARF Conselho Administrativo de Recursos Fiscais',fonte:'Decreto nº 70.235/1972; Lei nº 11.941/2009'},
-    {texto:'EFD-Contribuições escrituração digital de PIS/COFINS',fonte:'IN RFB nº 1.252/2012'},
-    {texto:'ECF Escrituração Contábil Fiscal substitui a DIPJ',fonte:'IN RFB nº 1.422/2013'},
-    {texto:'ECD Escrituração Contábil Digital',fonte:'IN RFB nº 1.420/2013'},
-    {texto:'NF-e Nota Fiscal Eletrônica',fonte:'Ajuste SINIEF 07/2005; legislação estadual'},
-    {texto:'NFS-e Nota Fiscal de Serviços Eletrônica',fonte:'Lei Complementar nº 116/2003; ABRASF'},
-    {texto:'Lei nº 8.212/1991 Lei Orgânica da Seguridade Social',fonte:'Lei nº 8.212, de 24 de julho de 1991'},
-    {texto:'PIS COFINS contribuições sociais sobre receita',fonte:'Leis nº 10.637/2002 e 10.833/2003'},
-    {texto:'CSLL Contribuição Social sobre o Lucro Líquido',fonte:'Lei nº 7.689/1988'},
-    {texto:'IRRF Imposto de Renda Retido na Fonte',fonte:'Regulamento do Imposto de Renda (Decreto nº 9.580/2018)'},
-  ],
-  erros_comuns: [
-    {padrao:/DIRF.{0,30}(2024|2025).{0,30}obrigat|obrigat.{0,20}DIRF.{0,20}(2024|2025)/i,msg:'A DIRF foi extinta para fatos geradores a partir de 1º de janeiro de 2025. A última entrega obrigatória foi referente ao ano-calendário 2024.',fonte:'IN RFB nº 2.096/2022; Receita Federal'},
-    {padrao:/prazo.{0,20}EFD-Reinf.{0,20}último dia útil|EFD-Reinf.{0,20}prazo.{0,20}último/i,msg:'O prazo da EFD-Reinf é o dia 15 (não o último dia útil). Em caso de feriado bancário, é antecipado para o dia útil imediatamente anterior.',fonte:'FAQ SPED/RFB — sped.rfb.gov.br'},
-    {padrao:/DCTFWeb.{0,30}antecipad.{0,20}dia não útil|antecipad.{0,20}DCTFWeb/i,msg:'Desde a IN RFB nº 2.162/2023, quando o dia 15 da DCTFWeb cai em dia não útil, o prazo é POSTERGADO (não antecipado) para o primeiro dia útil seguinte.',fonte:'IN RFB nº 2.162/2023'},
-    {padrao:/multa.{0,20}DCTFWeb.{0,10}5%|5%.{0,10}multa.{0,20}DCTFWeb/i,msg:'A multa MAED da DCTFWeb é de 2% ao mês, não 5%. Limitada a 20% do total das contribuições informadas.',fonte:'Art. 32-A da Lei nº 8.212/1991'},
-    {padrao:/EFD-Reinf.{0,20}Sem Movimento|Sem Movimento.{0,20}EFD-Reinf/i,msg:'A EFD-Reinf não possui evento "Sem Movimento". Quando não há fatos a declarar, o contribuinte fica dispensado de enviar qualquer evento.',fonte:'IN RFB nº 2.043/2021; FAQ SPED/RFB'},
-    {padrao:/SPED.{0,20}(criado|instituído).{0,20}2010|2010.{0,20}SPED/i,msg:'O SPED foi criado pelo Decreto nº 6.022/2007, não em 2010.',fonte:'Decreto nº 6.022/2007'},
-    {padrao:/CBS.{0,30}substitui.{0,20}ICMS|IBS.{0,30}substitui.{0,20}PIS/i,msg:'CBS substitui PIS/COFINS (federal). IBS substitui ICMS (estadual) e ISS (municipal). Verifique se as substituições não estão invertidas no texto.',fonte:'EC nº 132/2023; LC nº 214/2025'},
-    {padrao:/unifica.{0,20}DCTFWeb.{0,20}2022|DCTFWeb.{0,20}unifica.{0,20}2022/i,msg:'A unificação da DCTF PGD com a DCTFWeb ocorreu a partir de janeiro de 2025, não em 2022.',fonte:'GOV.BR — Serviço DCTFWeb unificada 2025'},
-  ],
-  alertas: [
-    {re:/\bDIRF\b/,msg:'Menciona DIRF — verificar: para fatos geradores a partir de 01/01/2025, a DIRF foi extinta e substituída pelos eventos R-4000 da EFD-Reinf.',fonte:'IN RFB nº 2.096/2022'},
-    {re:/\bDCTF\b(?!Web)/,msg:'Menciona "DCTF" sem "Web" — pode referir-se à DCTF mensal (PGD), que foi unificada à DCTFWeb a partir de janeiro de 2025.',fonte:'GOV.BR — gov.br/pt-br/servicos'},
-    {re:/reforma tributária|CBS|IBS|imposto seletivo/i,msg:'Conteúdo sobre Reforma Tributária — confirmar alinhamento com EC nº 132/2023 e LC nº 214/2025. Normas regulamentadoras ainda em fase de publicação.',fonte:'EC nº 132/2023; LC nº 214/2025'},
-    {re:/\bprazo\b.{0,10}\b20\b|\b20\b.{0,10}\bprazo\b/,msg:'Menciona prazo dia 20 — confirmar contexto: prazo de recolhimento de contribuições previdenciárias é dia 20, mas entrega da EFD-Reinf e DCTFWeb é dia 15.',fonte:'FAQ SPED/RFB — sped.rfb.gov.br'},
-    {re:/parcelamento.{0,20}PERT|PERT/i,msg:'Menciona PERT/parcelamento especial — verificar se o programa ainda está ativo. Programas de parcelamento têm vigência limitada.',fonte:'Receita Federal — gov.br/receitafederal'},
-  ]
-};
-
 let reportData = null;
 let fileContent = '';
 let currentTab = 'text';
+
+const SCOPE_LABELS = {
+  fiscal:        'Fiscal',
+  tributario:    'Tributário',
+  contabil:      'Contábil',
+  obrigacoes:    'Obrigações Acessórias',
+  previdenciario:'Previdenciário',
+  trabalhista:   'Trabalhista',
+  reforma:       'Reforma Tributária',
+  noticias:      'Notícias / Contexto',
+  ortografia:    'Ortografia e Gramática',
+};
+
+const SCOPE_INSTRUCTIONS = {
+  fiscal:        'Verifique precisão técnica em matéria fiscal: tributos (IRPF, IRPJ, IPI, ICMS, ISS, IOF, ITR), fatos geradores, bases de cálculo, alíquotas, isenções, imunidades, regime de caixa vs competência e nomenclaturas oficiais corretas.',
+  tributario:    'Verifique precisão tributária: regimes (Simples Nacional, Lucro Presumido, Lucro Real, Lucro Arbitrado), compensações, deduções, planejamento tributário, responsabilidade solidária, substituição tributária e conceitos do CTN.',
+  contabil:      'Verifique precisão contábil: normas CPC/IFRS, classificação de contas, lançamentos, reconhecimento de receitas e despesas, depreciação, provisões e terminologia contábil correta conforme CFC.',
+  obrigacoes:    'Verifique obrigações acessórias: prazos, periodicidades e nomenclaturas corretas de SPED, EFD-Reinf, DCTFWeb, eSocial, ECF, ECD, EFD-Contribuições, DCTF, DIRF (extinta em 2025), NF-e, NFS-e e demais obrigações digitais.',
+  previdenciario:'Verifique precisão previdenciária: INSS, retenção sobre serviços (cessão de mão de obra), CPRB, GPS, GFIP, contribuições patronais, segurado empregado vs contribuinte individual, benefícios (aposentadoria, auxílio-doença) e normas RGPS.',
+  trabalhista:   'Verifique precisão trabalhista: CLT, FGTS, férias, 13º salário, horas extras, rescisão, CTPS, eSocial para eventos trabalhistas, convenções coletivas e normas do MTE.',
+  reforma:       'Verifique precisão sobre a Reforma Tributária: EC 132/2023, LC 214/2025, IBS (substitui ICMS e ISS), CBS (substitui PIS/COFINS), IS (Imposto Seletivo), CBS e IBS a partir de 2026 (fase de teste), transição até 2033, extinção do PIS/COFINS e prazos. Alerte sobre informações desatualizadas ou incorretas sobre a reforma.',
+  noticias:      'Verifique se o conteúdo está alinhado com o contexto regulatório recente (2024–2025): novas instruções normativas, portarias, despachos e notícias da Receita Federal. Aponte afirmações que possam ter sido superadas por norma posterior.',
+  ortografia:    'Revise ortografia, gramática, concordância verbal e nominal, pontuação, crase, regência e clareza do texto em português brasileiro. Indique cada erro encontrado com a forma correta.',
+};
 
 function switchTab(tab, el) {
   currentTab = tab;
@@ -316,6 +331,12 @@ document.getElementById('scope-grid').addEventListener('click', e=>{
   const item = e.target.closest('.scope-item');
   if(item) item.classList.toggle('on');
 });
+
+function toggleAll() {
+  const items = document.querySelectorAll('.scope-item');
+  const allOn = [...items].every(i=>i.classList.contains('on'));
+  items.forEach(i=> allOn ? i.classList.remove('on') : i.classList.add('on'));
+}
 
 function handleFile(input) {
   const file = input.files[0];
@@ -331,82 +352,132 @@ function getActiveText() {
   return document.getElementById('txt-input').value.trim();
 }
 
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
-async function animate(steps) {
-  const fill = document.getElementById('progress-fill');
-  const label = document.getElementById('progress-label');
-  const log = document.getElementById('step-log');
-  for(const s of steps) {
-    label.textContent = s.label;
-    fill.style.width = s.pct + '%';
-    if(s.log) log.textContent = s.log;
-    await sleep(s.delay || 600);
-  }
+function getActiveScopes() {
+  return [...document.querySelectorAll('.scope-item.on')].map(i=>i.dataset.scope);
 }
 
-function analyzeText(text) {
-  const findings = [];
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-  for(const erro of KB.erros_comuns) {
-    if(erro.padrao.test(text)) {
-      findings.push({type:'err',badge:'❌ INCORRETO',title:'Inconsistência identificada',body:erro.msg,source:erro.fonte});
+async function animateTo(pct, label, log, delay=600) {
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = label;
+  if(log !== null) document.getElementById('step-log').textContent = log;
+  await sleep(delay);
+}
+
+async function callClaudeAPI(text, scopes, format) {
+  const scopeInstructions = scopes.map(s =>
+    `- **${SCOPE_LABELS[s]}**: ${SCOPE_INSTRUCTIONS[s]}`
+  ).join('\n');
+
+  const systemPrompt = `Você é o Revisor Técnico Jettax, especialista em conteúdo fiscal, tributário, contábil e linguístico brasileiro.
+
+Sua função é revisar materiais produzidos pela equipe de conteúdo da Jettax com rigor técnico e precisão.
+
+O material enviado é do formato: **${format}**. Adapte sua análise ao formato — por exemplo, posts de redes sociais usam linguagem mais informal e sintética, o que é esperado e não deve ser criticado; o foco é na precisão técnica e nos erros de conteúdo.
+
+Escopos de revisão selecionados pelo usuário (revise APENAS estes aspectos):
+${scopeInstructions}
+
+Instruções de saída:
+- Responda APENAS com um objeto JSON válido, sem texto antes ou depois, sem blocos de código markdown.
+- O JSON deve ter exatamente esta estrutura:
+{
+  "findings": [
+    {
+      "type": "err" | "warn" | "ok",
+      "badge": "❌ INCORRETO" | "⚠️ ATENÇÃO" | "✅ CORRETO",
+      "scope": "nome do escopo",
+      "title": "título curto do achado",
+      "body": "explicação detalhada",
+      "source": "fonte ou referência legal"
     }
+  ]
+}
+
+Regras para classificação:
+- "err": informação factualmente errada, nomenclatura incorreta, dado falso ou enganoso
+- "warn": informação que pode estar desatualizada, incompleta, ambígua ou que merece verificação
+- "ok": informação correta e bem expressa — inclua ao menos 1-2 itens positivos quando o conteúdo estiver correto
+
+Se não houver nenhum problema técnico relevante nos escopos selecionados, retorne ao menos um item "ok" descrevendo o que está correto.
+Seja objetivo e específico. Cite trechos do texto original quando relevante (entre aspas).`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: `Revise o seguinte material:\n\n${text}` }]
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(()=>({}));
+    throw new Error(err.error?.message || `Erro HTTP ${response.status}`);
   }
 
-  for(const alerta of KB.alertas) {
-    if(alerta.re.test(text)) {
-      findings.push({type:'warn',badge:'⚠️ ATENÇÃO',title:'Ponto requer verificação',body:alerta.msg,source:alerta.fonte});
-    }
-  }
-
-  const lower = text.toLowerCase();
-  for(const norma of KB.normas) {
-    const trecho = norma.texto.split(' ').slice(0,5).join(' ').toLowerCase();
-    if(lower.includes(trecho.substring(0,Math.min(trecho.length,35)))) {
-      findings.push({type:'ok',badge:'✅ CORRETO',title:norma.texto.length>90?norma.texto.substring(0,90)+'...':norma.texto,body:'Informação identificada e confirmada conforme norma vigente.',source:norma.fonte});
-    }
-  }
-
-  if(findings.length === 0) {
-    findings.push({type:'warn',badge:'⚠️ ATENÇÃO',title:'Nenhuma correspondência direta encontrada',body:'O texto não gerou correspondências na base de conhecimento atual. O conteúdo pode abordar temas fora do escopo carregado ou utilizar vocabulário técnico distinto. Recomenda-se revisão manual com as fontes oficiais.',source:'gov.br/receitafederal | sped.rfb.gov.br | planalto.gov.br'});
-  }
-
-  return findings;
+  const data = await response.json();
+  const raw = data.content.map(b => b.text || '').join('').trim();
+  const clean = raw.replace(/^```json|^```|```$/gm, '').trim();
+  return JSON.parse(clean);
 }
 
 async function runReview() {
   const text = getActiveText();
-  if(!text || text.length < 30) {
-    alert('Por favor, insira um texto com pelo menos 30 caracteres.');
+  if(!text || text.length < 20) {
+    alert('Por favor, insira um texto com pelo menos 20 caracteres.');
     return;
   }
+  const scopes = getActiveScopes();
+  if(scopes.length === 0) {
+    alert('Selecione ao menos um escopo de revisão.');
+    return;
+  }
+
+  const format = document.getElementById('content-format').options[document.getElementById('content-format').selectedIndex].text;
   const btn = document.getElementById('btn-run');
   btn.disabled = true;
   document.getElementById('result-area').style.display = 'none';
   document.getElementById('progress-wrap').style.display = 'block';
 
-  await animate([
-    {label:'Lendo o material...',pct:15,log:'Processando texto...',delay:500},
-    {label:'Identificando afirmações técnicas...',pct:35,log:'Buscando termos fiscais e tributários...',delay:700},
-    {label:'Consultando base de normas oficiais...',pct:60,log:'Cruzando com IN RFB, Leis e Decretos...',delay:800},
-    {label:'Verificando inconsistências...',pct:82,log:'Checando prazos, multas e nomenclaturas...',delay:700},
-    {label:'Gerando relatório...',pct:95,log:'Compilando resultados...',delay:500},
-    {label:'Concluído!',pct:100,log:'',delay:300},
-  ]);
+  const errorBox = document.getElementById('error-box');
+  if(errorBox) errorBox.remove();
 
-  const findings = analyzeText(text);
-  reportData = {text, findings, date: new Date().toLocaleString('pt-BR')};
-  renderResults(findings);
-  document.getElementById('progress-wrap').style.display = 'none';
-  document.getElementById('result-area').style.display = 'block';
-  btn.disabled = false;
+  try {
+    await animateTo(10, 'Lendo o material...', 'Processando texto...', 400);
+    await animateTo(30, 'Identificando afirmações técnicas...', `Formato: ${format} · Escopos: ${scopes.map(s=>SCOPE_LABELS[s]).join(', ')}`, 600);
+    await animateTo(55, 'Consultando base de conhecimento...', 'Cruzando com normas, leis e instruções normativas...', 500);
+    await animateTo(75, 'Analisando com IA...', 'Verificando inconsistências e pontos de atenção...', 400);
+
+    const result = await callClaudeAPI(text, scopes, format);
+
+    await animateTo(95, 'Gerando relatório...', 'Compilando resultados...', 400);
+    await animateTo(100, 'Concluído!', '', 300);
+
+    reportData = { text, findings: result.findings, scopes, format, date: new Date().toLocaleString('pt-BR') };
+    renderResults(result.findings);
+    document.getElementById('progress-wrap').style.display = 'none';
+    document.getElementById('result-area').style.display = 'block';
+
+  } catch(e) {
+    document.getElementById('progress-wrap').style.display = 'none';
+    const box = document.createElement('div');
+    box.className = 'error-box';
+    box.id = 'error-box';
+    box.innerHTML = `<strong><i class="ti ti-alert-circle"></i> Erro ao processar análise</strong><br>${e.message}`;
+    document.getElementById('btn-run').insertAdjacentElement('afterend', box);
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 function renderResults(findings) {
-  const ok = findings.filter(f=>f.type==='ok').length;
+  const ok   = findings.filter(f=>f.type==='ok').length;
   const warn = findings.filter(f=>f.type==='warn').length;
-  const err = findings.filter(f=>f.type==='err').length;
+  const err  = findings.filter(f=>f.type==='err').length;
 
   document.getElementById('stats-row').innerHTML = `
     <div class="stat ok"><div class="n">${ok}</div><div class="lbl">✅ Correto(s)</div></div>
@@ -417,9 +488,9 @@ function renderResults(findings) {
   c.innerHTML = '';
 
   const sections = [
-    {type:'err',icon:'ti-alert-circle',label:'Inconsistências identificadas'},
-    {type:'warn',icon:'ti-alert-triangle',label:'Pontos de atenção'},
-    {type:'ok',icon:'ti-circle-check',label:'Informações verificadas e corretas'},
+    {type:'err', icon:'ti-alert-circle',   label:'Inconsistências identificadas'},
+    {type:'warn',icon:'ti-alert-triangle', label:'Pontos de atenção'},
+    {type:'ok',  icon:'ti-circle-check',   label:'Informações verificadas e corretas'},
   ];
 
   for(const sec of sections) {
@@ -432,7 +503,15 @@ function renderResults(findings) {
     items.forEach(f=>{
       const div = document.createElement('div');
       div.className = 'finding '+f.type;
-      div.innerHTML = `<div class="finding-head"><span class="badge ${f.type}">${f.badge}</span><span class="finding-title">${f.title}</span></div><div class="finding-body">${f.body}</div><div class="finding-source"><i class="ti ti-book"></i> ${f.source}</div>`;
+      const scopeTag = f.scope ? `<span style="font-size:10px;background:var(--jt-light);color:var(--jt-blue);padding:2px 7px;border-radius:100px;font-weight:500;">${f.scope}</span>` : '';
+      div.innerHTML = `
+        <div class="finding-head">
+          <span class="badge ${f.type}">${f.badge}</span>
+          ${scopeTag}
+          <span class="finding-title">${f.title}</span>
+        </div>
+        <div class="finding-body">${f.body}</div>
+        <div class="finding-source"><i class="ti ti-book"></i> ${f.source}</div>`;
       c.appendChild(div);
     });
   }
@@ -440,20 +519,27 @@ function renderResults(findings) {
 
 function downloadReport() {
   if(!reportData) return;
-  const {findings, date} = reportData;
-  const ok=findings.filter(f=>f.type==='ok').length;
-  const warn=findings.filter(f=>f.type==='warn').length;
-  const err=findings.filter(f=>f.type==='err').length;
-  let txt = `RELATÓRIO DE REVISÃO TÉCNICA — JETTAX\nData: ${date}\n${'='.repeat(60)}\n\nRESUMO: ${ok} correto(s) | ${warn} atenção | ${err} incorreto(s)\n\n`;
+  const {findings, scopes, format, date} = reportData;
+  const ok   = findings.filter(f=>f.type==='ok').length;
+  const warn = findings.filter(f=>f.type==='warn').length;
+  const err  = findings.filter(f=>f.type==='err').length;
+
+  let txt = `RELATÓRIO DE REVISÃO TÉCNICA — JETTAX\nData: ${date}\n`;
+  txt += `Formato: ${format}\nEscopos: ${scopes.map(s=>SCOPE_LABELS[s]).join(', ')}\n`;
+  txt += `${'='.repeat(60)}\n\nRESUMO: ${ok} correto(s) | ${warn} atenção | ${err} incorreto(s)\n\n`;
+
   const secs = [{type:'err',label:'INCORRETOS'},{type:'warn',label:'PONTOS DE ATENÇÃO'},{type:'ok',label:'CORRETOS'}];
   for(const s of secs) {
     const items = findings.filter(f=>f.type===s.type);
     if(!items.length) continue;
     txt += `${'─'.repeat(60)}\n${s.label}\n${'─'.repeat(60)}\n`;
-    items.forEach(f=>{txt+=`\n${f.badge}\n${f.title}\n${f.body}\nFonte: ${f.source}\n`;});
+    items.forEach(f=>{
+      txt += `\n${f.badge}${f.scope ? ' ['+f.scope+']' : ''}\n${f.title}\n${f.body}\nFonte: ${f.source}\n`;
+    });
     txt += '\n';
   }
   txt += `${'='.repeat(60)}\nFontes: gov.br/receitafederal | sped.rfb.gov.br | planalto.gov.br\n`;
+
   const blob = new Blob([txt],{type:'text/plain;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
