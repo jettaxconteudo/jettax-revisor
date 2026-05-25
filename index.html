@@ -421,8 +421,10 @@ Seja objetivo e específico. Cite trechos do texto original quando relevante (en
 
   const data = await response.json();
   const raw = data.content.map(b => b.text || '').join('').trim();
-  const clean = raw.replace(/^```json|^```|```$/gm, '').trim();
-  return JSON.parse(clean);
+  const clean = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
+  const match = clean.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('Resposta inválida da IA. Tente novamente.');
+  return JSON.parse(match[0]);
 }
 
 async function runReview() {
