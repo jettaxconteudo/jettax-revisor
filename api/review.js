@@ -1,23 +1,29 @@
 export const config = { runtime: 'edge' };
 
 const SCOPE_INSTRUCTIONS = {
-  fiscal:        'Verifique precisão técnica em matéria fiscal: tributos (IRPF, IRPJ, IPI, ICMS, ISS, IOF, ITR), fatos geradores, bases de cálculo, alíquotas, isenções, imunidades, regime de caixa vs competência e nomenclaturas oficiais corretas.',
-  tributario:    'Verifique precisão tributária: regimes (Simples Nacional, Lucro Presumido, Lucro Real, Lucro Arbitrado), compensações, deduções, planejamento tributário, responsabilidade solidária, substituição tributária e conceitos do CTN.',
-  contabil:      'Verifique precisão contábil: normas CPC/IFRS, classificação de contas, lançamentos, reconhecimento de receitas e despesas, depreciação, provisões e terminologia contábil correta conforme CFC.',
-  obrigacoes:    'Verifique obrigações acessórias: prazos, periodicidades e nomenclaturas corretas de SPED, EFD-Reinf, DCTFWeb, eSocial, ECF, ECD, EFD-Contribuições, DCTF, DIRF (extinta em 2025), NF-e, NFS-e e demais obrigações digitais.',
-  previdenciario:'Verifique precisão previdenciária: INSS, retenção sobre serviços (cessão de mão de obra), CPRB, GPS, GFIP, contribuições patronais, segurado empregado vs contribuinte individual, benefícios (aposentadoria, auxílio-doença) e normas RGPS.',
-  trabalhista:   'Verifique precisão trabalhista: CLT, FGTS, férias, 13º salário, horas extras, rescisão, CTPS, eSocial para eventos trabalhistas, convenções coletivas e normas do MTE.',
-  reforma:       'Verifique precisão sobre a Reforma Tributária: EC 132/2023, LC 214/2025, IBS (substitui ICMS e ISS), CBS (substitui PIS/COFINS), IS (Imposto Seletivo), transição até 2033, extinção do PIS/COFINS e prazos.',
-  noticias:      'Verifique se o conteúdo está alinhado com o contexto regulatório recente (2024-2025): novas instruções normativas, portarias e notícias da Receita Federal. Aponte afirmações que possam ter sido superadas por norma posterior.',
-  ortografia:    'Revise ortografia, gramática, concordância verbal e nominal, pontuação, crase, regência e clareza do texto em português brasileiro. Indique cada erro encontrado com a forma correta.',
+  fiscal:        'Verifique precisao tecnica em materia fiscal: tributos (IRPF, IRPJ, IPI, ICMS, ISS, IOF, ITR), fatos geradores, bases de calculo, aliquotas, isencoes, imunidades, regime de caixa vs competencia e nomenclaturas oficiais corretas.',
+  tributario:    'Verifique precisao tributaria: regimes (Simples Nacional, Lucro Presumido, Lucro Real, Lucro Arbitrado), compensacoes, deducoes, planejamento tributario, responsabilidade solidaria, substituicao tributaria e conceitos do CTN.',
+  contabil:      'Verifique precisao contabil: normas CPC/IFRS, classificacao de contas, lancamentos, reconhecimento de receitas e despesas, depreciacao, provisoes e terminologia contabil correta conforme CFC.',
+  obrigacoes:    'Verifique obrigacoes acessorias: prazos, periodicidades e nomenclaturas corretas de SPED, EFD-Reinf, DCTFWeb, eSocial, ECF, ECD, EFD-Contribuicoes, DCTF, DIRF (extinta em 2025), NF-e, NFS-e.',
+  previdenciario:'Verifique precisao previdenciaria: INSS, retencao sobre servicos, CPRB, GPS, GFIP, contribuicoes patronais, segurado empregado vs contribuinte individual, beneficios e normas RGPS.',
+  trabalhista:   'Verifique precisao trabalhista: CLT, FGTS, ferias, 13 salario, horas extras, rescisao, CTPS, eSocial trabalhista, convencoes coletivas e normas do MTE.',
+  reforma:       'Verifique precisao sobre Reforma Tributaria: EC 132/2023, LC 214/2025, IBS (substitui ICMS e ISS), CBS (substitui PIS/COFINS), IS (Imposto Seletivo), transicao ate 2033.',
+  noticias:      'Verifique alinhamento com contexto regulatorio recente 2024-2025: novas instrucoes normativas, portarias e noticias da Receita Federal.',
+  ortografia:    'Revise ortografia, gramatica, concordancia verbal e nominal, pontuacao, crase, regencia e clareza do texto em portugues brasileiro.',
 };
 
 const SCOPE_LABELS = {
-  fiscal: 'Fiscal', tributario: 'Tributário', contabil: 'Contábil',
-  obrigacoes: 'Obrigações Acessórias', previdenciario: 'Previdenciário',
-  trabalhista: 'Trabalhista', reforma: 'Reforma Tributária',
-  noticias: 'Notícias / Contexto', ortografia: 'Ortografia e Gramática',
+  fiscal: 'Fiscal', tributario: 'Tributario', contabil: 'Contabil',
+  obrigacoes: 'Obrigacoes Acessorias', previdenciario: 'Previdenciario',
+  trabalhista: 'Trabalhista', reforma: 'Reforma Tributaria',
+  noticias: 'Noticias e Contexto', ortografia: 'Ortografia e Gramatica',
 };
+
+function stripFences(text) {
+  return text
+    .replace(/^[\s\S]*?(\{)/, '$1')
+    .replace(/\}[\s\S]*$/, '}');
+}
 
 export default async function handler(req) {
   if (req.method !== 'POST') {
@@ -26,7 +32,7 @@ export default async function handler(req) {
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    return new Response(JSON.stringify({ error: { message: 'API key não configurada' } }), {
+    return new Response(JSON.stringify({ error: { message: 'API key nao configurada' } }), {
       status: 500, headers: { 'Content-Type': 'application/json' }
     });
   }
@@ -34,28 +40,21 @@ export default async function handler(req) {
   try {
     const { text, scopes, format } = await req.json();
 
-    const scopeInstructions = scopes.map(s =>
+    const scopeLines = scopes.map(s =>
       `- ${SCOPE_LABELS[s] || s}: ${SCOPE_INSTRUCTIONS[s] || s}`
     ).join('\n');
 
-    const systemPrompt = [
-      'Você é o Revisor Técnico Jettax, especialista em conteúdo fiscal, tributário, contábil e linguístico brasileiro.',
-      '',
-      'Sua função é revisar materiais produzidos pela equipe de conteúdo da Jettax com rigor técnico e precisão.',
-      '',
-      `O material é do formato: ${format}. Adapte sua análise — posts de redes sociais usam linguagem informal e sintética, o que é esperado; foque na precisão técnica.`,
-      '',
-      'Escopos de revisão (revise APENAS estes aspectos):',
-      scopeInstructions,
-      '',
-      'IMPORTANTE: Responda SOMENTE com JSON válido, sem texto antes ou depois, sem blocos de código.',
-      'Estrutura obrigatória:',
-      '{"findings":[{"type":"err","badge":"INCORRETO","scope":"nome","title":"titulo","body":"explicacao","source":"fonte"}]}',
-      '',
-      'Tipos: "err" para erros factuais, "warn" para pontos de atenção, "ok" para informações corretas.',
-      'Inclua ao menos 1 item "ok" quando o conteúdo estiver correto.',
-      'Use badge "INCORRETO" para err, "ATENCAO" para warn, "CORRETO" para ok.',
-    ].join('\n');
+    const systemPrompt = `Voce e o Revisor Tecnico Jettax, especialista em conteudo fiscal, tributario, contabil e linguistico brasileiro.
+
+Revise o material enviado com rigor tecnico. O formato e: ${format}.
+
+Escopos ativos:
+${scopeLines}
+
+INSTRUCAO CRITICA: Retorne APENAS um objeto JSON puro, sem nenhum texto antes ou depois, sem blocos de codigo, sem acentos nas chaves. Use exatamente esta estrutura:
+{"findings":[{"type":"ok","badge":"CORRETO","scope":"nome","title":"titulo sem aspas especiais","body":"explicacao","source":"fonte"}]}
+
+Tipos permitidos: err, warn, ok. Inclua ao menos 1 item ok quando o conteudo estiver correto.`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -68,7 +67,7 @@ export default async function handler(req) {
         model: 'claude-sonnet-4-6',
         max_tokens: 1000,
         system: systemPrompt,
-        messages: [{ role: 'user', content: `Revise:\n\n${text}` }]
+        messages: [{ role: 'user', content: text }]
       })
     });
 
@@ -80,18 +79,13 @@ export default async function handler(req) {
       });
     }
 
-    const raw = data.content.map(b => b.text || '').join('').trim();
-    // Strip markdown code fences if present
-    const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-    // Extract the JSON object
-    const match = stripped.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('Resposta inválida da IA: ' + raw.substring(0, 100));
-    const parsed = JSON.parse(match[0]);
+    const raw = data.content.map(b => b.text || '').join('');
+    const jsonStr = stripFences(raw);
+    const parsed = JSON.parse(jsonStr);
 
-    // Normalize badges
     parsed.findings = parsed.findings.map(f => ({
       ...f,
-      badge: f.type === 'err' ? '❌ INCORRETO' : f.type === 'warn' ? '⚠️ ATENÇÃO' : '✅ CORRETO'
+      badge: f.type === 'err' ? '❌ INCORRETO' : f.type === 'warn' ? '⚠️ ATENCAO' : '✅ CORRETO'
     }));
 
     return new Response(JSON.stringify(parsed), {
