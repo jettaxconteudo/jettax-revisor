@@ -81,8 +81,11 @@ export default async function handler(req) {
     }
 
     const raw = data.content.map(b => b.text || '').join('').trim();
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('Resposta inválida da IA');
+    // Strip markdown code fences if present
+    const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    // Extract the JSON object
+    const match = stripped.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Resposta inválida da IA: ' + raw.substring(0, 100));
     const parsed = JSON.parse(match[0]);
 
     // Normalize badges
