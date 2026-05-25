@@ -366,65 +366,19 @@ async function animateTo(pct, label, log, delay=600) {
 }
 
 async function callClaudeAPI(text, scopes, format) {
-  const scopeInstructions = scopes.map(s =>
-    `- **${SCOPE_LABELS[s]}**: ${SCOPE_INSTRUCTIONS[s]}`
-  ).join('\n');
-
-  const systemPrompt = `Você é o Revisor Técnico Jettax, especialista em conteúdo fiscal, tributário, contábil e linguístico brasileiro.
-
-Sua função é revisar materiais produzidos pela equipe de conteúdo da Jettax com rigor técnico e precisão.
-
-O material enviado é do formato: **${format}**. Adapte sua análise ao formato — por exemplo, posts de redes sociais usam linguagem mais informal e sintética, o que é esperado e não deve ser criticado; o foco é na precisão técnica e nos erros de conteúdo.
-
-Escopos de revisão selecionados pelo usuário (revise APENAS estes aspectos):
-${scopeInstructions}
-
-Instruções de saída:
-- Responda APENAS com um objeto JSON válido, sem texto antes ou depois, sem blocos de código markdown.
-- O JSON deve ter exatamente esta estrutura:
-{
-  "findings": [
-    {
-      "type": "err" | "warn" | "ok",
-      "badge": "❌ INCORRETO" | "⚠️ ATENÇÃO" | "✅ CORRETO",
-      "scope": "nome do escopo",
-      "title": "título curto do achado",
-      "body": "explicação detalhada",
-      "source": "fonte ou referência legal"
-    }
-  ]
-}
-
-Regras para classificação:
-- "err": informação factualmente errada, nomenclatura incorreta, dado falso ou enganoso
-- "warn": informação que pode estar desatualizada, incompleta, ambígua ou que merece verificação
-- "ok": informação correta e bem expressa — inclua ao menos 1-2 itens positivos quando o conteúdo estiver correto
-
-Se não houver nenhum problema técnico relevante nos escopos selecionados, retorne ao menos um item "ok" descrevendo o que está correto.
-Seja objetivo e específico. Cite trechos do texto original quando relevante (entre aspas).`;
-
   const response = await fetch('/api/review', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: `Revise o seguinte material:\n\n${text}` }]
-    })
+    body: JSON.stringify({ text, scopes, format })
   });
 
+  const data = await response.json();
+
   if (!response.ok) {
-    const err = await response.json().catch(()=>({}));
-    throw new Error(err.error?.message || `Erro HTTP ${response.status}`);
+    throw new Error(data.error?.message || `Erro HTTP ${response.status}`);
   }
 
-  const data = await response.json();
-  const raw = data.content.map(b => b.text || '').join('').trim();
-  const clean = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
-  const match = clean.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('Resposta inválida da IA. Tente novamente.');
-  return JSON.parse(match[0]);
+  return data;
 }
 
 async function runReview() {
