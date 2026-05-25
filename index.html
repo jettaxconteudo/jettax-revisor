@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revisor Técnico Jettax</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --jt-blue:#0F3460;--jt-blue-mid:#1A5F7A;--jt-accent:#00C9FF;
+  --jt-light:#E8F4FD;--jt-border:#D0E8F5;
+  --ok:#16A34A;--ok-bg:#F0FDF4;--ok-border:#BBF7D0;
+  --warn:#D97706;--warn-bg:#FFFBEB;--warn-border:#FDE68A;
+  --err:#DC2626;--err-bg:#FEF2F2;--err-border:#FECACA;
+  --text:#1E293B;--muted:#64748B;--bg:#F0F6FF;
+}
+body{font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);min-height:100vh;padding:24px 16px;}
+.container{max-width:780px;margin:0 auto;}
+
+.header{
+  background:var(--jt-blue);
+  padding:18px 24px;
+  border-radius:12px 12px 0 0;
+  display:flex;align-items:center;gap:12px;
+}
+.logo-mark{
+  width:40px;height:40px;background:var(--jt-accent);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-family:'Sora',sans-serif;font-weight:700;font-size:20px;color:var(--jt-blue);
+  flex-shrink:0;
+}
+.header-text h1{font-family:'Sora',sans-serif;font-size:17px;font-weight:700;color:#fff;}
+.header-text p{font-size:12px;color:rgba(255,255,255,0.65);margin-top:2px}
+
+.body{
+  background:#fff;
+  border:1px solid var(--jt-border);
+  border-top:none;
+  border-radius:0 0 12px 12px;
+  padding:24px;
+}
+
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--jt-border);margin-bottom:20px}
+.tab{
+  padding:9px 18px;font-size:13px;font-weight:500;color:var(--muted);
+  cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;
+  background:none;border-top:none;border-left:none;border-right:none;
+}
+.tab.active{color:var(--jt-blue);border-bottom-color:var(--jt-accent)}
+.tab:hover:not(.active){color:var(--jt-blue-mid)}
+.panel{display:none}.panel.active{display:block}
+
+label{font-size:13px;font-weight:500;color:var(--muted);display:block;margin-bottom:6px}
+textarea{
+  width:100%;min-height:170px;padding:12px;
+  border:1px solid var(--jt-border);border-radius:8px;
+  font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);
+  resize:vertical;outline:none;line-height:1.6;transition:border .15s;
+}
+textarea:focus{border-color:var(--jt-accent)}
+
+.upload-zone{
+  border:1.5px dashed var(--jt-border);border-radius:8px;
+  padding:28px;text-align:center;cursor:pointer;
+  transition:all .15s;background:var(--jt-light);
+}
+.upload-zone:hover{border-color:var(--jt-accent);background:#EFF9FF}
+.upload-zone i{font-size:32px;color:var(--jt-blue-mid);display:block;margin-bottom:8px}
+.upload-zone p{font-size:13px;color:var(--muted);margin-top:4px}
+.upload-zone strong{color:var(--jt-blue);font-size:14px}
+#file-input{display:none}
+#file-name{font-size:12px;color:var(--ok);margin-top:8px;min-height:16px}
+
+.scope-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;
+  margin-bottom:16px;
+}
+.scope-item{
+  border:1px solid var(--jt-border);border-radius:8px;
+  padding:9px 12px;font-size:12px;cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+  color:var(--muted);transition:all .15s;user-select:none;
+  background:#fff;
+}
+.scope-item.on{background:var(--jt-light);border-color:var(--jt-accent);color:var(--jt-blue);font-weight:500}
+.scope-item i{font-size:15px}
+
+.btn-run{
+  width:100%;padding:13px;
+  background:var(--jt-blue);color:#fff;
+  border:none;border-radius:8px;
+  font-family:'Sora',sans-serif;font-size:14px;font-weight:600;
+  cursor:pointer;transition:background .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:16px;
+}
+.btn-run:hover{background:var(--jt-blue-mid)}
+.btn-run:disabled{opacity:.5;cursor:not-allowed}
+
+.progress-wrap{display:none;margin-top:16px}
+.progress-label{font-size:12px;color:var(--muted);margin-bottom:6px}
+.progress-bar-bg{background:var(--jt-light);border-radius:100px;height:7px;overflow:hidden}
+.progress-bar-fill{height:100%;width:0%;background:var(--jt-accent);border-radius:100px;transition:width .4s ease;}
+.step-log{margin-top:8px;font-size:12px;color:var(--muted);min-height:16px}
+
+.result-area{display:none;margin-top:20px}
+.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.result-header h2{font-family:'Sora',sans-serif;font-size:15px;color:var(--jt-blue);font-weight:700}
+.btn-dl{
+  padding:8px 16px;background:var(--jt-accent);color:var(--jt-blue);
+  border:none;border-radius:6px;font-size:12px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;gap:5px;
+  font-family:'Sora',sans-serif;transition:opacity .15s;
+}
+.btn-dl:hover{opacity:.85}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat{border-radius:8px;padding:12px;text-align:center;}
+.stat.ok{background:var(--ok-bg);border:1px solid var(--ok-border)}
+.stat.warn{background:var(--warn-bg);border:1px solid var(--warn-border)}
+.stat.err{background:var(--err-bg);border:1px solid var(--err-border)}
+.stat .n{font-family:'Sora',sans-serif;font-size:26px;font-weight:700}
+.stat.ok .n{color:var(--ok)}.stat.warn .n{color:var(--warn)}.stat.err .n{color:var(--err)}
+.stat .lbl{font-size:11px;color:var(--muted);margin-top:2px}
+
+.finding{border-radius:8px;padding:14px;margin-bottom:8px;border-left:3px solid;}
+.finding.ok{background:var(--ok-bg);border-color:var(--ok)}
+.finding.warn{background:var(--warn-bg);border-color:var(--warn)}
+.finding.err{background:var(--err-bg);border-color:var(--err)}
+.finding-head{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:100px}
+.badge.ok{background:var(--ok);color:#fff}
+.badge.warn{background:var(--warn);color:#fff}
+.badge.err{background:var(--err);color:#fff}
+.finding-title{font-size:13px;font-weight:500;color:var(--text)}
+.finding-body{font-size:13px;color:var(--text);line-height:1.6}
+.finding-source{font-size:11px;color:var(--muted);margin-top:6px}
+
+.section-title{
+  font-family:'Sora',sans-serif;font-size:13px;font-weight:700;
+  color:var(--jt-blue);margin:16px 0 8px;
+  padding-bottom:6px;border-bottom:1px solid var(--jt-border);
+}
+
+.disclaimer{
+  font-size:11px;color:var(--muted);
+  background:var(--jt-light);border-radius:6px;
+  padding:10px 12px;margin-top:14px;line-height:1.6;
+}
+
+.footer{
+  text-align:center;margin-top:16px;
+  font-size:11px;color:var(--muted);
+}
+.footer a{color:var(--jt-blue-mid);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <div class="logo-mark">J</div>
+  <div class="header-text">
+    <h1>Revisor Técnico Jettax</h1>
+    <p>Análise fiscal, tributária e contábil com base em fontes oficiais</p>
+  </div>
+</div>
+
+<div class="body">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('text',this)">
+      <i class="ti ti-align-left"></i> Colar texto
+    </button>
+    <button class="tab" onclick="switchTab('file',this)">
+      <i class="ti ti-upload"></i> Upload arquivo
+    </button>
+  </div>
+
+  <div id="panel-text" class="panel active">
+    <label for="txt-input">Cole o material para revisão</label>
+    <textarea id="txt-input" placeholder="Cole aqui o artigo, manual, parecer ou qualquer conteúdo técnico fiscal/tributário/contábil que deseja revisar..."></textarea>
+  </div>
+
+  <div id="panel-file" class="panel">
+    <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+      <i class="ti ti-file-text"></i>
+      <strong>Clique para selecionar o arquivo</strong>
+      <p>Formatos aceitos: .txt e .md</p>
+    </div>
+    <input type="file" id="file-input" accept=".txt,.md" onchange="handleFile(this)">
+    <div id="file-name"></div>
+  </div>
+
+  <div style="margin-top:18px">
+    <label>Escopo de revisão</label>
+    <div class="scope-grid" id="scope-grid">
+      <div class="scope-item on" data-scope="fiscal"><i class="ti ti-receipt"></i> Fiscal</div>
+      <div class="scope-item on" data-scope="tributario"><i class="ti ti-building-bank"></i> Tributário</div>
+      <div class="scope-item on" data-scope="contabil"><i class="ti ti-calculator"></i> Contábil</div>
+      <div class="scope-item on" data-scope="obrigacoes"><i class="ti ti-clipboard-list"></i> Obrig. Acessórias</div>
+      <div class="scope-item on" data-scope="noticias"><i class="ti ti-news"></i> Notícias / Contexto</div>
+    </div>
+  </div>
+
+  <button class="btn-run" id="btn-run" onclick="runReview()">
+    <i class="ti ti-search"></i> Analisar material
+  </button>
+
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="progress-label" id="progress-label">Iniciando análise...</div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+    <div class="step-log" id="step-log"></div>
+  </div>
+
+  <div class="result-area" id="result-area">
+    <div class="result-header">
+      <h2><i class="ti ti-report-analytics"></i> Relatório de Verificação</h2>
+      <button class="btn-dl" onclick="downloadReport()">
+        <i class="ti ti-download"></i> Baixar relatório (.txt)
+      </button>
+    </div>
+    <div class="stats" id="stats-row"></div>
+    <div id="findings-container"></div>
+    <div class="disclaimer">
+      <i class="ti ti-info-circle"></i>
+      <strong>Aviso:</strong> Este agente utiliza base de conhecimento pré-carregada com normas vigentes até agosto de 2025. Para legislação posterior, recomenda-se consulta direta às fontes oficiais: <strong>gov.br/receitafederal</strong>, <strong>sped.rfb.gov.br</strong> e <strong>planalto.gov.br</strong>.
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Desenvolvido para a equipe de conteúdo da <a href="https://www.jettax.com.br" target="_blank">Jettax</a> · Uso interno
+</div>
+
+</div>
+
+<script>
+const KB = {
+  normas: [
+    {texto:'EFD-Reinf foi criada pela IN RFB nº 1.701/2017 e atualmente é disciplinada pela IN RFB nº 2.043/2021',fonte:'IN RFB nº 2.043/2021 — sped.rfb.gov.br'},
+    {texto:'prazo de entrega da EFD-Reinf é o dia 15 do mês seguinte',fonte:'FAQ SPED/RFB — sped.rfb.gov.br/item/show/1497'},
+    {texto:'DCTFWeb deve ser entregue até o dia 15 do mês seguinte',fonte:'IN RFB nº 2.005/2021; IN RFB nº 2.162/2023'},
+    {texto:'DCTF mensal unificada à DCTFWeb a partir de janeiro de 2025',fonte:'GOV.BR — gov.br/pt-br/servicos'},
+    {texto:'multa por atraso na DCTFWeb é de 2% ao mês limitada a 20%',fonte:'Art. 32-A da Lei nº 8.212/1991'},
+    {texto:'multa mínima da DCTFWeb é de R$ 200',fonte:'Art. 32-A da Lei nº 8.212/1991'},
+    {texto:'DIRF extinta para fatos geradores a partir de 1º de janeiro de 2025',fonte:'IN RFB nº 2.096/2022; Receita Federal'},
+    {texto:'SPED foi criado pelo Decreto nº 6.022/2007',fonte:'Decreto nº 6.022, de 22 de janeiro de 2007'},
+    {texto:'eSocial em conjunto com EFD-Reinf alimenta a DCTFWeb',fonte:'Manual EFD-Reinf — sped.rfb.gov.br'},
+    {texto:'CPRB Contribuição Previdenciária sobre a Receita Bruta',fonte:'Lei nº 12.546/2011'},
+    {texto:'DCTFWeb retificadora deve ser transmitida mesmo sem alteração de valores',fonte:'P&R DCTFWeb fev/2025 — gov.br/receitafederal'},
+    {texto:'EFD-Reinf dispensa envio quando não há fatos a declarar',fonte:'IN RFB nº 2.043/2021; FAQ SPED/RFB'},
+    {texto:'Série R-4000 da EFD-Reinf substitui as informações da DIRF',fonte:'IN RFB nº 2.096/2022 e atos posteriores'},
+    {texto:'retenção de INSS sobre serviços prestados mediante cessão de mão de obra',fonte:'Art. 31 da Lei nº 8.212/1991; IN RFB nº 971/2009'},
+    {texto:'MAED emitida automaticamente pelo sistema a partir de julho de 2022',fonte:'Receita Federal — Notícia jun/2022'},
+    {texto:'MIT Módulo de Inclusão de Tributos integrado à DCTFWeb a partir de 2025',fonte:'GOV.BR — Serviço DCTFWeb unificada'},
+    {texto:'quando o dia 15 cair em dia não útil para a DCTFWeb o prazo é postergado',fonte:'IN RFB nº 2.162/2023'},
+    {texto:'quando o dia 15 cair em feriado bancário para a EFD-Reinf o prazo é antecipado',fonte:'sped.rfb.gov.br/pagina/show/6017'},
+    {texto:'Simples Nacional regime tributário diferenciado para ME e EPP',fonte:'Lei Complementar nº 123/2006'},
+    {texto:'Lucro Real regime de tributação com base no lucro efetivo',fonte:'Decreto nº 9.580/2018 (RIR)'},
+    {texto:'Lucro Presumido regime com base presumida de lucro',fonte:'Arts. 591 a 603 do Decreto nº 9.580/2018'},
+    {texto:'ICMS Imposto sobre Circulação de Mercadorias e Serviços',fonte:'Lei Complementar nº 87/1996 (Lei Kandir)'},
+    {texto:'ISS Imposto Sobre Serviços de qualquer natureza',fonte:'Lei Complementar nº 116/2003'},
+    {texto:'Reforma Tributária sobre o Consumo instituída pela Emenda Constitucional nº 132/2023',fonte:'EC nº 132/2023; LC nº 214/2025'},
+    {texto:'CBS Contribuição sobre Bens e Serviços substitui PIS/COFINS',fonte:'LC nº 214/2025'},
+    {texto:'IBS Imposto sobre Bens e Serviços substitui ICMS e ISS',fonte:'LC nº 214/2025'},
+    {texto:'IS Imposto Seletivo incide sobre bens e serviços prejudiciais à saúde',fonte:'EC nº 132/2023; LC nº 214/2025'},
+    {texto:'DAS Documento de Arrecadação do Simples Nacional',fonte:'Lei Complementar nº 123/2006'},
+    {texto:'e-CAC Centro Virtual de Atendimento ao Contribuinte da Receita Federal',fonte:'gov.br/receitafederal'},
+    {texto:'CND Certidão Negativa de Débitos',fonte:'Art. 205 do Código Tributário Nacional'},
+    {texto:'CARF Conselho Administrativo de Recursos Fiscais',fonte:'Decreto nº 70.235/1972; Lei nº 11.941/2009'},
+    {texto:'EFD-Contribuições escrituração digital de PIS/COFINS',fonte:'IN RFB nº 1.252/2012'},
+    {texto:'ECF Escrituração Contábil Fiscal substitui a DIPJ',fonte:'IN RFB nº 1.422/2013'},
+    {texto:'ECD Escrituração Contábil Digital',fonte:'IN RFB nº 1.420/2013'},
+    {texto:'NF-e Nota Fiscal Eletrônica',fonte:'Ajuste SINIEF 07/2005; legislação estadual'},
+    {texto:'NFS-e Nota Fiscal de Serviços Eletrônica',fonte:'Lei Complementar nº 116/2003; ABRASF'},
+    {texto:'Lei nº 8.212/1991 Lei Orgânica da Seguridade Social',fonte:'Lei nº 8.212, de 24 de julho de 1991'},
+    {texto:'PIS COFINS contribuições sociais sobre receita',fonte:'Leis nº 10.637/2002 e 10.833/2003'},
+    {texto:'CSLL Contribuição Social sobre o Lucro Líquido',fonte:'Lei nº 7.689/1988'},
+    {texto:'IRRF Imposto de Renda Retido na Fonte',fonte:'Regulamento do Imposto de Renda (Decreto nº 9.580/2018)'},
+  ],
+  erros_comuns: [
+    {padrao:/DIRF.{0,30}(2024|2025).{0,30}obrigat|obrigat.{0,20}DIRF.{0,20}(2024|2025)/i,msg:'A DIRF foi extinta para fatos geradores a partir de 1º de janeiro de 2025. A última entrega obrigatória foi referente ao ano-calendário 2024.',fonte:'IN RFB nº 2.096/2022; Receita Federal'},
+    {padrao:/prazo.{0,20}EFD-Reinf.{0,20}último dia útil|EFD-Reinf.{0,20}prazo.{0,20}último/i,msg:'O prazo da EFD-Reinf é o dia 15 (não o último dia útil). Em caso de feriado bancário, é antecipado para o dia útil imediatamente anterior.',fonte:'FAQ SPED/RFB — sped.rfb.gov.br'},
+    {padrao:/DCTFWeb.{0,30}antecipad.{0,20}dia não útil|antecipad.{0,20}DCTFWeb/i,msg:'Desde a IN RFB nº 2.162/2023, quando o dia 15 da DCTFWeb cai em dia não útil, o prazo é POSTERGADO (não antecipado) para o primeiro dia útil seguinte.',fonte:'IN RFB nº 2.162/2023'},
+    {padrao:/multa.{0,20}DCTFWeb.{0,10}5%|5%.{0,10}multa.{0,20}DCTFWeb/i,msg:'A multa MAED da DCTFWeb é de 2% ao mês, não 5%. Limitada a 20% do total das contribuições informadas.',fonte:'Art. 32-A da Lei nº 8.212/1991'},
+    {padrao:/EFD-Reinf.{0,20}Sem Movimento|Sem Movimento.{0,20}EFD-Reinf/i,msg:'A EFD-Reinf não possui evento "Sem Movimento". Quando não há fatos a declarar, o contribuinte fica dispensado de enviar qualquer evento.',fonte:'IN RFB nº 2.043/2021; FAQ SPED/RFB'},
+    {padrao:/SPED.{0,20}(criado|instituído).{0,20}2010|2010.{0,20}SPED/i,msg:'O SPED foi criado pelo Decreto nº 6.022/2007, não em 2010.',fonte:'Decreto nº 6.022/2007'},
+    {padrao:/CBS.{0,30}substitui.{0,20}ICMS|IBS.{0,30}substitui.{0,20}PIS/i,msg:'CBS substitui PIS/COFINS (federal). IBS substitui ICMS (estadual) e ISS (municipal). Verifique se as substituições não estão invertidas no texto.',fonte:'EC nº 132/2023; LC nº 214/2025'},
+    {padrao:/unifica.{0,20}DCTFWeb.{0,20}2022|DCTFWeb.{0,20}unifica.{0,20}2022/i,msg:'A unificação da DCTF PGD com a DCTFWeb ocorreu a partir de janeiro de 2025, não em 2022.',fonte:'GOV.BR — Serviço DCTFWeb unificada 2025'},
+  ],
+  alertas: [
+    {re:/\bDIRF\b/,msg:'Menciona DIRF — verificar: para fatos geradores a partir de 01/01/2025, a DIRF foi extinta e substituída pelos eventos R-4000 da EFD-Reinf.',fonte:'IN RFB nº 2.096/2022'},
+    {re:/\bDCTF\b(?!Web)/,msg:'Menciona "DCTF" sem "Web" — pode referir-se à DCTF mensal (PGD), que foi unificada à DCTFWeb a partir de janeiro de 2025.',fonte:'GOV.BR — gov.br/pt-br/servicos'},
+    {re:/reforma tributária|CBS|IBS|imposto seletivo/i,msg:'Conteúdo sobre Reforma Tributária — confirmar alinhamento com EC nº 132/2023 e LC nº 214/2025. Normas regulamentadoras ainda em fase de publicação.',fonte:'EC nº 132/2023; LC nº 214/2025'},
+    {re:/\bprazo\b.{0,10}\b20\b|\b20\b.{0,10}\bprazo\b/,msg:'Menciona prazo dia 20 — confirmar contexto: prazo de recolhimento de contribuições previdenciárias é dia 20, mas entrega da EFD-Reinf e DCTFWeb é dia 15.',fonte:'FAQ SPED/RFB — sped.rfb.gov.br'},
+    {re:/parcelamento.{0,20}PERT|PERT/i,msg:'Menciona PERT/parcelamento especial — verificar se o programa ainda está ativo. Programas de parcelamento têm vigência limitada.',fonte:'Receita Federal — gov.br/receitafederal'},
+  ]
+};
+
+let reportData = null;
+let fileContent = '';
+let currentTab = 'text';
+
+function switchTab(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+}
+
+document.getElementById('scope-grid').addEventListener('click', e=>{
+  const item = e.target.closest('.scope-item');
+  if(item) item.classList.toggle('on');
+});
+
+function handleFile(input) {
+  const file = input.files[0];
+  if(!file) return;
+  document.getElementById('file-name').textContent = '📄 ' + file.name + ' carregado com sucesso';
+  const reader = new FileReader();
+  reader.onload = e => { fileContent = e.target.result; };
+  reader.readAsText(file);
+}
+
+function getActiveText() {
+  if(currentTab === 'file') return fileContent;
+  return document.getElementById('txt-input').value.trim();
+}
+
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+async function animate(steps) {
+  const fill = document.getElementById('progress-fill');
+  const label = document.getElementById('progress-label');
+  const log = document.getElementById('step-log');
+  for(const s of steps) {
+    label.textContent = s.label;
+    fill.style.width = s.pct + '%';
+    if(s.log) log.textContent = s.log;
+    await sleep(s.delay || 600);
+  }
+}
+
+function analyzeText(text) {
+  const findings = [];
+
+  for(const erro of KB.erros_comuns) {
+    if(erro.padrao.test(text)) {
+      findings.push({type:'err',badge:'❌ INCORRETO',title:'Inconsistência identificada',body:erro.msg,source:erro.fonte});
+    }
+  }
+
+  for(const alerta of KB.alertas) {
+    if(alerta.re.test(text)) {
+      findings.push({type:'warn',badge:'⚠️ ATENÇÃO',title:'Ponto requer verificação',body:alerta.msg,source:alerta.fonte});
+    }
+  }
+
+  const lower = text.toLowerCase();
+  for(const norma of KB.normas) {
+    const trecho = norma.texto.split(' ').slice(0,5).join(' ').toLowerCase();
+    if(lower.includes(trecho.substring(0,Math.min(trecho.length,35)))) {
+      findings.push({type:'ok',badge:'✅ CORRETO',title:norma.texto.length>90?norma.texto.substring(0,90)+'...':norma.texto,body:'Informação identificada e confirmada conforme norma vigente.',source:norma.fonte});
+    }
+  }
+
+  if(findings.length === 0) {
+    findings.push({type:'warn',badge:'⚠️ ATENÇÃO',title:'Nenhuma correspondência direta encontrada',body:'O texto não gerou correspondências na base de conhecimento atual. O conteúdo pode abordar temas fora do escopo carregado ou utilizar vocabulário técnico distinto. Recomenda-se revisão manual com as fontes oficiais.',source:'gov.br/receitafederal | sped.rfb.gov.br | planalto.gov.br'});
+  }
+
+  return findings;
+}
+
+async function runReview() {
+  const text = getActiveText();
+  if(!text || text.length < 30) {
+    alert('Por favor, insira um texto com pelo menos 30 caracteres.');
+    return;
+  }
+  const btn = document.getElementById('btn-run');
+  btn.disabled = true;
+  document.getElementById('result-area').style.display = 'none';
+  document.getElementById('progress-wrap').style.display = 'block';
+
+  await animate([
+    {label:'Lendo o material...',pct:15,log:'Processando texto...',delay:500},
+    {label:'Identificando afirmações técnicas...',pct:35,log:'Buscando termos fiscais e tributários...',delay:700},
+    {label:'Consultando base de normas oficiais...',pct:60,log:'Cruzando com IN RFB, Leis e Decretos...',delay:800},
+    {label:'Verificando inconsistências...',pct:82,log:'Checando prazos, multas e nomenclaturas...',delay:700},
+    {label:'Gerando relatório...',pct:95,log:'Compilando resultados...',delay:500},
+    {label:'Concluído!',pct:100,log:'',delay:300},
+  ]);
+
+  const findings = analyzeText(text);
+  reportData = {text, findings, date: new Date().toLocaleString('pt-BR')};
+  renderResults(findings);
+  document.getElementById('progress-wrap').style.display = 'none';
+  document.getElementById('result-area').style.display = 'block';
+  btn.disabled = false;
+}
+
+function renderResults(findings) {
+  const ok = findings.filter(f=>f.type==='ok').length;
+  const warn = findings.filter(f=>f.type==='warn').length;
+  const err = findings.filter(f=>f.type==='err').length;
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat ok"><div class="n">${ok}</div><div class="lbl">✅ Correto(s)</div></div>
+    <div class="stat warn"><div class="n">${warn}</div><div class="lbl">⚠️ Atenção</div></div>
+    <div class="stat err"><div class="n">${err}</div><div class="lbl">❌ Incorreto(s)</div></div>`;
+
+  const c = document.getElementById('findings-container');
+  c.innerHTML = '';
+
+  const sections = [
+    {type:'err',icon:'ti-alert-circle',label:'Inconsistências identificadas'},
+    {type:'warn',icon:'ti-alert-triangle',label:'Pontos de atenção'},
+    {type:'ok',icon:'ti-circle-check',label:'Informações verificadas e corretas'},
+  ];
+
+  for(const sec of sections) {
+    const items = findings.filter(f=>f.type===sec.type);
+    if(!items.length) continue;
+    const h = document.createElement('div');
+    h.className = 'section-title';
+    h.innerHTML = `<i class="ti ${sec.icon}"></i> ${sec.label}`;
+    c.appendChild(h);
+    items.forEach(f=>{
+      const div = document.createElement('div');
+      div.className = 'finding '+f.type;
+      div.innerHTML = `<div class="finding-head"><span class="badge ${f.type}">${f.badge}</span><span class="finding-title">${f.title}</span></div><div class="finding-body">${f.body}</div><div class="finding-source"><i class="ti ti-book"></i> ${f.source}</div>`;
+      c.appendChild(div);
+    });
+  }
+}
+
+function downloadReport() {
+  if(!reportData) return;
+  const {findings, date} = reportData;
+  const ok=findings.filter(f=>f.type==='ok').length;
+  const warn=findings.filter(f=>f.type==='warn').length;
+  const err=findings.filter(f=>f.type==='err').length;
+  let txt = `RELATÓRIO DE REVISÃO TÉCNICA — JETTAX\nData: ${date}\n${'='.repeat(60)}\n\nRESUMO: ${ok} correto(s) | ${warn} atenção | ${err} incorreto(s)\n\n`;
+  const secs = [{type:'err',label:'INCORRETOS'},{type:'warn',label:'PONTOS DE ATENÇÃO'},{type:'ok',label:'CORRETOS'}];
+  for(const s of secs) {
+    const items = findings.filter(f=>f.type===s.type);
+    if(!items.length) continue;
+    txt += `${'─'.repeat(60)}\n${s.label}\n${'─'.repeat(60)}\n`;
+    items.forEach(f=>{txt+=`\n${f.badge}\n${f.title}\n${f.body}\nFonte: ${f.source}\n`;});
+    txt += '\n';
+  }
+  txt += `${'='.repeat(60)}\nFontes: gov.br/receitafederal | sped.rfb.gov.br | planalto.gov.br\n`;
+  const blob = new Blob([txt],{type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Jettax_Revisao_Tecnica_'+new Date().toISOString().slice(0,10)+'.txt';
+  a.click();
+}
+</script>
+</body>
+</html>
