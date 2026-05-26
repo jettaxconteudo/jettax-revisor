@@ -365,7 +365,16 @@ async function animateTo(pct, label, log, delay=600) {
   await sleep(delay);
 }
 
+async function getKey() {
+  const res = await fetch('/api/key');
+  if (!res.ok) throw new Error('Chave nao configurada. Contate o administrador.');
+  const data = await res.json();
+  if (data.error) throw new Error('Chave nao configurada. Contate o administrador.');
+  return data.k;
+}
+
 async function callClaudeAPI(text, scopes, format) {
+  const apiKey = await getKey();
   const SCOPE_INSTRUCTIONS = {
     fiscal:        'Verifique precisao tecnica em materia fiscal: tributos (IRPF, IRPJ, IPI, ICMS, ISS, IOF, ITR), fatos geradores, bases de calculo, aliquotas, isencoes e nomenclaturas oficiais.',
     tributario:    'Verifique precisao tributaria: regimes (Simples Nacional, Lucro Presumido, Lucro Real), compensacoes, deducoes, substituicao tributaria e conceitos do CTN.',
@@ -392,7 +401,7 @@ async function callClaudeAPI(text, scopes, format) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': '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',
+      'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true'
     },
