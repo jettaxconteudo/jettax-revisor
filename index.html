@@ -372,10 +372,19 @@ async function callClaudeAPI(text, scopes, format) {
     body: JSON.stringify({ text, scopes, format })
   });
 
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch(e) {
+    throw new Error('Resposta invalida do servidor: ' + e.message);
+  }
 
   if (!response.ok) {
     throw new Error(data.error?.message || `Erro HTTP ${response.status}`);
+  }
+
+  if (!data.findings) {
+    throw new Error('Estrutura inesperada: ' + JSON.stringify(data).substring(0, 200));
   }
 
   return data;
