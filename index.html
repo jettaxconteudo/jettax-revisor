@@ -395,7 +395,7 @@ async function callClaudeAPI(text, scopes, format) {
 
   const scopeLines = scopes.map(s => `- ${SCOPE_LABELS[s]}: ${SCOPE_INSTRUCTIONS[s]}`).join('\n');
 
-  const systemPrompt = `Voce e o Revisor Tecnico Jettax. Revise o material (formato: ${format}).\n\nEscopos ativos:\n${scopeLines}\n\nRetorne APENAS JSON puro sem markdown. Estrutura:\n{"findings":[{"type":"ok","badge":"CORRETO","scope":"nome","title":"titulo","body":"explicacao","source":"fonte"}]}\n\nTipos: err (erro factual), warn (atencao), ok (correto). Inclua ao menos 1 ok.`;
+  const systemPrompt = `Voce e o Revisor Tecnico Jettax. Revise o material (formato: ${format}).\n\nEscopos ativos:\n${scopeLines}\n\nRetorne APENAS JSON puro sem markdown. Estrutura:\n{"findings":[{"type":"ok","badge":"CORRETO","scope":"nome","title":"titulo","body":"explicacao","source":"fonte"}]}\n\nTipos: err (erro factual), warn (atencao), ok (correto). Inclua ao menos 1 ok. Maximo 6 findings no total. Mantenha body com no maximo 2 frases curtas cada.`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -407,7 +407,7 @@ async function callClaudeAPI(text, scopes, format) {
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2048,
+      max_tokens: 4096,
       system: systemPrompt,
       messages: [{ role: 'user', content: text }]
     })
